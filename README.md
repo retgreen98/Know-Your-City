@@ -14,8 +14,8 @@ Click on any feature to view detailed information about functional zones, catego
 
 ![Check Function](sample/checn_function.png)
 
-### Dig In Mode - Rectangle Analysis
-Draw a rectangle to analyze the distribution of functional zones within the selected area.
+### Dig In Mode - Polygon Analysis
+Draw a polygon/rectangle to analyze the distribution of functional zones within the selected area.
 
 ![Draw Rectangle](sample/dig_in_draw.png)
 
@@ -24,8 +24,8 @@ Draw a polyline to analyze functional zones along the route with 500m buffer zon
 
 ![Draw Polyline](sample/dig_in_line.png)
 
-### Dig In Mode - Metro Line Analysis
-Select metro lines from the list to analyze functional zones around each station along the route.
+### Dig In Mode - Public Transit Line Analysis
+Select public transit lines from the list to analyze functional zones around each station along the route.
 
 ![Metro Line Analysis](sample/dig_in_public.png)
 
