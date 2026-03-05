@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know_Your_City 0.1</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 顶部进度条 -->
+    <div id="progress-bar"></div>
+    
+    <div id="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>正在加载地图数据...</p>
+        </div>
+    </div>
+    
+    <div id="status-message"></div>
+    
+    <div id="controls">
+        <button id="view-btn" class="control-btn">Check</button>
+        <button id="explore-btn" class="control-btn">Dig In</button>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div id="legend"></div>
+    
+    <div id="info-panel" class="hidden">
+        <button id="back-btn" class="hidden">←</button>
+        <button id="close-info">×</button>
+        <div id="info-content"></div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/geojson-vt@3.2.1/geojson-vt.js"></script>
+    <script src="https://unpkg.com/leaflet.vectorgrid@1.3.0/dist/Leaflet.VectorGrid.bundled.js"></script>
+    
+    <!-- Application modules -->
+    <script src="{{ url_for('static', filename='ui-controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='map-init.js') }}"></script>
+    <script src="{{ url_for('static', filename='map-renderer.js') }}"></script>
+    <script src="{{ url_for('static', filename='map-labels.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='feature-modes.js') }}"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

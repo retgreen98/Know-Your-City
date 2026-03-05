@@ -1,0 +1,708 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* 顶部进度条 */
+#progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff9500, #ffb347);
+    z-index: 10000;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    box-shadow: 0 0 10px rgba(255, 149, 0, 0.5);
+}
+
+#progress-bar.loading {
+    opacity: 1;
+}
+
+#map {
+    width: 100vw;
+    height: 100vh;
+    background-color: #f5f5f5;
+}
+
+/* 确保地图容器和图层没有滤镜或透明度变化 */
+.leaflet-container {
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+.leaflet-pane {
+    filter: none !important;
+}
+
+.leaflet-tile-pane,
+.leaflet-overlay-pane {
+    opacity: 1 !important;
+}
+
+/* 强制 SVG 元素不变暗 */
+.leaflet-overlay-pane svg {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+.leaflet-overlay-pane svg path {
+    opacity: 1 !important;
+}
+
+.leaflet-overlay-pane svg g {
+    opacity: 1 !important;
+}
+
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#loading-overlay.hidden {
+    display: none;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#status-message {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-size: 16px;
+    display: none;
+}
+
+#status-message.show {
+    display: block;
+}
+
+#controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+}
+
+.control-btn:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.control-btn.active {
+    background: #2196F3;
+}
+
+#info-panel {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    width: 350px;
+    max-height: 70vh;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    overflow: hidden;
+    padding: 20px;
+    padding-top: 40px;
+}
+
+#info-panel.hidden {
+    display: none;
+}
+
+#back-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+#back-btn:hover {
+    background: #f0f0f0;
+    border-radius: 4px;
+    color: #333;
+}
+
+#back-btn.hidden {
+    display: none;
+}
+
+#close-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+#close-info:hover {
+    background: #f0f0f0;
+    border-radius: 4px;
+    color: #333;
+}
+
+#info-content {
+    max-height: calc(70vh - 60px);
+    overflow-y: auto;
+}
+
+.info-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    color: #333;
+}
+
+/* 新的要素信息卡片样式 */
+.feature-info-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #2196F3;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row .info-label {
+    font-weight: 600;
+    color: #666;
+    margin: 0;
+    min-width: 80px;
+}
+
+.info-row .info-value {
+    color: #333;
+    text-align: right;
+    flex: 1;
+    font-weight: 500;
+}
+
+/* Function Group 列表样式 */
+.function-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.function-group-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #ddd;
+    transition: all 0.2s;
+}
+
+.function-group-item:hover {
+    background: #f0f1f3;
+    transform: translateX(2px);
+}
+
+.function-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.function-group-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.function-group-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-left: 22px;
+}
+
+.stat-item {
+    font-weight: 500;
+}
+
+.stat-divider {
+    color: #bdc3c7;
+    font-weight: 300;
+}
+
+.leaflet-popup-content {
+    margin: 10px;
+    min-width: 200px;
+}
+
+.popup-item {
+    margin: 5px 0;
+}
+
+.popup-label {
+    font-weight: bold;
+    color: #555;
+}
+
+#legend {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.7);  /* 70% 透明 */
+    backdrop-filter: blur(10px);  /* 毛玻璃效果 */
+    padding: 12px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    min-width: 140px;
+}
+
+#legend h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #2196F3;
+    padding-bottom: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 6px 0;
+}
+
+.legend-color {
+    width: 14px;  /* 更小 */
+    height: 14px;  /* 更小 */
+    border-radius: 50%;  /* 正圆 */
+    margin-right: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.legend-label {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.3;
+}
+
+/* 选区标签样式 */
+.district-label {
+    background: none;
+    border: none;
+}
+
+.district-label-text {
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff,
+        0 0 3px #fff;
+}
+
+/* 行政区标签样式 */
+.admin-label {
+    background: none;
+    border: none;
+}
+
+.admin-label-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e74c3c;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff,
+        0 0 4px #fff,
+        0 0 8px #fff;
+}
+
+/* 比例尺样式优化 */
+.leaflet-control-scale {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-control-scale-line {
+    border: 2px solid #333;
+    border-top: none;
+    color: #333;
+    font-weight: bold;
+}
+
+/* 底图灰度滤镜 - 让所有底图变成统一的浅灰色 */
+.map-tiles-gray {
+    filter: grayscale(100%) brightness(1.2) contrast(0.8);
+    opacity: 0.6;
+}
+
+/* 强制隐藏所有可能的多余按钮 */
+.leaflet-draw-draw-polyline,
+a[title*="Draw a polyline"],
+a[title*="Metro"],
+a[title*="Lines"] {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+}
+
+/* 隐藏工具提示 */
+.leaflet-draw-tooltip {
+    display: none !important;
+}
+
+/* 自定义按钮样式 - 无背景 */
+#custom-polyline-btn,
+#custom-delete-btn {
+    background: transparent !important;
+}
+
+#custom-polyline-btn a,
+#custom-delete-btn a {
+    display: block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    text-decoration: none;
+    background: transparent !important;
+    color: #333;
+    font-size: 18px;
+    transition: opacity 0.2s;
+}
+
+#custom-polyline-btn a:hover,
+#custom-delete-btn a:hover {
+    opacity: 0.7;
+}
+
+/* Polyline submenu styles */
+.polyline-submenu {
+    position: absolute !important;
+    left: 40px !important;
+    top: 0 !important;
+    background: white !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    z-index: 10000 !important;
+    min-width: 120px !important;
+    display: block !important;
+}
+
+.polyline-menu-item {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.polyline-menu-item:last-child {
+    border-bottom: none;
+}
+
+.polyline-menu-item:hover {
+    background: #f5f5f5;
+}
+
+.polyline-menu-disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+.polyline-menu-disabled:hover {
+    background: white;
+}
+
+/* 强制覆盖 Leaflet.Draw 可能隐藏的样式 */
+.leaflet-draw-actions,
+.leaflet-draw-actions ul,
+.leaflet-draw-actions li {
+    display: none !important;
+}
+
+/* Polyline options toolbar - 模仿 Leaflet.Draw 样式 */
+#polyline-options-toolbar,
+.custom-draw-actions {
+    position: fixed !important;
+    top: 60px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10000 !important;
+    pointer-events: auto !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+#polyline-options-toolbar ul,
+.custom-draw-actions ul {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+#polyline-options-toolbar li,
+.custom-draw-actions li {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+#polyline-options-toolbar li:last-child,
+.custom-draw-actions li:last-child {
+    border-right: none !important;
+}
+
+#polyline-options-toolbar li.leaflet-draw-actions-cancel,
+.custom-draw-actions li.leaflet-draw-actions-cancel {
+    border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+#polyline-options-toolbar a,
+.custom-draw-actions a {
+    display: block !important;
+    padding: 10px 20px !important;
+    color: white !important;
+    text-decoration: none !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    transition: background 0.2s !important;
+    cursor: pointer !important;
+}
+
+#polyline-options-toolbar a:hover,
+.custom-draw-actions a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Metro lines list styles */
+.metro-lines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.metro-line-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.metro-line-item:hover {
+    background: #e9ecef;
+    transform: translateX(3px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.metro-line-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.metro-line-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.metro-line-stations {
+    font-size: 12px;
+    color: #7f8c8d;
+    background: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Node results styles */
+.node-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.node-result-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #ddd;
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.node-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+}
+
+.node-number {
+    font-weight: 600;
+    font-size: 13px;
+    color: #555;
+}
+
+.node-function {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.node-function-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+.node-stats {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-left: 20px;
+}
