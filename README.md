@@ -2,7 +2,7 @@
 
 A city functional zone visualization and analysis system based on Flask + Leaflet.js.
 
-## User Experience
+## How to Use
 
 ### Main Interface
 After launching the application, you'll see an interactive map with functional zones displayed in different colors.
